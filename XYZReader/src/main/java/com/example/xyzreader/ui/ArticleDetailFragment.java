@@ -12,18 +12,22 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.ShareCompat;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.graphics.Palette;
 import android.text.Html;
 import android.text.format.DateUtils;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toolbar;
 
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
@@ -45,16 +49,12 @@ public class ArticleDetailFragment extends Fragment implements
     private Cursor mCursor;
     private long mItemId;
     private View mRootView;
-    private int mMutedColor = 0xFF333333;
-   // private ObservableScrollView mScrollView;
-   // private DrawInsetsFrameLayout mDrawInsetsFrameLayout;
-   // private ColorDrawable mStatusBarColorDrawable;
-private CoordinatorLayout coordinatorLayout;
+    private CoordinatorLayout coordinatorLayout;
+    private NestedScrollView scrollView;
     TextView titleView;
-    private int mTopInset;
-    private View mPhotoContainerView;
+    private int mMutedColor = 0xFF333333;
     private ImageView mPhotoView;
-    private int mScrollY;
+
     TextView bodyView;
     private boolean mIsCard = false;
     private int mStatusBarFullOpacityBottom;
@@ -122,9 +122,8 @@ private CoordinatorLayout coordinatorLayout;
 //                mTopInset = insets.top;
 //            }
 //        });
-
-//        mScrollView = (ObservableScrollView) mRootView.findViewById(R.id.scrollview);
-//        mScrollView.setCallbacks(new ObservableScrollView.Callbacks() {
+        scrollView = (NestedScrollView) mRootView.findViewById(R.id.scrollview);
+                //setCallbacks(new ObservableScrollView.Callbacks() {
 //            @Override
 //            public void onScrollChanged() {
 //                mScrollY = mScrollView.getScrollY();
@@ -133,25 +132,13 @@ private CoordinatorLayout coordinatorLayout;
 //                updateStatusBar();
 //            }
 //        });
-
-        mPhotoView = (ImageView) mRootView.findViewById(R.id.photo);
-        mPhotoContainerView = mRootView.findViewById(R.id.photo_container);
+       // mPhotoView = (ImageView) getActivity().findViewById(R.id.photo);
+      //  mPhotoContainerView = mRootView.findViewById(R.id.photo_container);
 
        // mStatusBarColorDrawable = new ColorDrawable(0);
 
-        mRootView.findViewById(R.id.share_fab).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(Intent.createChooser(ShareCompat.IntentBuilder.from(getActivity())
-                        .setType("text/plain")
-                        .setText("Some sample text")
-                        .getIntent(), getString(R.string.action_share)));
-            }
-        });
 
-        titleView = mRootView.findViewById(R.id.article_title);
-        bylineView =  mRootView.findViewById(R.id.article_byline);
-        bodyView = mRootView.findViewById(R.id.article_body);
+
         //getLoaderManager().initLoader(0, null, this);
        bindViews();
        // updateStatusBar();
@@ -202,14 +189,25 @@ private CoordinatorLayout coordinatorLayout;
 //        if (mRootView == null) {
 //            return;
 //        }
-//        bylineView.setMovementMethod(new LinkMovementMethod());
-        bodyView.setTypeface(Typeface.createFromAsset(getResources().getAssets(), "Rosario-Regular.ttf"));
+     mPhotoView = mRootView.findViewById(R.id.photo);
+        titleView = mRootView.findViewById(R.id.article_title);
+        bylineView =  mRootView.findViewById(R.id.article_byline);
+        bodyView = mRootView.findViewById(R.id.article_body);
 
+        bylineView.setMovementMethod(new LinkMovementMethod());
+        bodyView.setTypeface(Typeface.createFromAsset(getResources().getAssets(), "Rosario-Regular.ttf"));
         if (mCursor != null) {
             mRootView.setAlpha(0);
             mRootView.setVisibility(View.VISIBLE);
             mRootView.animate().alpha(1);
-            titleView.setText(mCursor.getString(ArticleLoader.Query.TITLE));
+            String title = mCursor.getString(ArticleLoader.Query.TITLE);
+            titleView.setText(title);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            }
+            String body = mCursor.getString(ArticleLoader.Query.BODY);
+            bodyView.setText(Html.fromHtml(body));
+            //bodyView.setText(Html.fromHtml(mCursor.getString(ArticleLoader.Query.BODY).replaceAll("(\r\n|\n)", "<br />")));
+
             Date publishedDate = parsePublishedDate();
             if (!publishedDate.before(START_OF_EPOCH.getTime())) {
                 bylineView.setText(Html.fromHtml(
@@ -229,10 +227,6 @@ private CoordinatorLayout coordinatorLayout;
                                 + "</font>"));
 
             }
-            bodyView.setText(Html.fromHtml(mCursor.getString(ArticleLoader.Query.BODY).replaceAll("(\r\n|\n)", "<br />")));
-//            Glide.with(getActivity())
-//                    .load(mCursor.getString(ArticleLoader.Query.PHOTO_URL))
-//            .into(mPhotoView).
 
             ImageLoaderHelper.getInstance(getActivity()).getImageLoader()
                     .get(mCursor.getString(ArticleLoader.Query.PHOTO_URL), new ImageLoader.ImageListener() {
@@ -245,15 +239,15 @@ private CoordinatorLayout coordinatorLayout;
                                 mPhotoView.setImageBitmap(imageContainer.getBitmap());
                                 mRootView.findViewById(R.id.meta_bar)
                                         .setBackgroundColor(mMutedColor);
-                              //  updateStatusBar();
                             }
                         }
-
                         @Override
                         public void onErrorResponse(VolleyError volleyError) {
-
                         }
                     });
+
+
+
         } else {
             mRootView.setVisibility(View.GONE);
             titleView.setText("N/A");
@@ -269,12 +263,12 @@ private CoordinatorLayout coordinatorLayout;
 
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-//        if (!isAdded()) {
-//            if (cursor != null) {
-//                cursor.close();
-//            }
-//            return;
-//        }
+        if (!isAdded()) {
+            if (cursor != null) {
+                cursor.close();
+            }
+            return;
+        }
 
         mCursor = cursor;
         if (mCursor != null && !mCursor.moveToFirst()) {
@@ -289,7 +283,7 @@ private CoordinatorLayout coordinatorLayout;
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
         mCursor = null;
-      //  bindViews();
+         bindViews();
     }
 
 //    public int getUpButtonFloor() {
