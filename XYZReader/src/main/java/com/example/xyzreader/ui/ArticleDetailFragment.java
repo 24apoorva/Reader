@@ -2,7 +2,6 @@ package com.example.xyzreader.ui;
 
 import android.app.Fragment;
 import android.app.LoaderManager;
-import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -11,12 +10,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
-
-import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.v4.app.ShareCompat;
-import android.support.v4.widget.NestedScrollView;
 import android.support.v7.graphics.Palette;
 import android.text.Html;
 import android.text.format.DateUtils;
@@ -27,8 +21,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toolbar;
-
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.example.xyzreader.R;
@@ -49,14 +41,11 @@ public class ArticleDetailFragment extends Fragment implements
     private Cursor mCursor;
     private long mItemId;
     private View mRootView;
-    private CoordinatorLayout coordinatorLayout;
-    private NestedScrollView scrollView;
     TextView titleView;
     private int mMutedColor = 0xFF333333;
     private ImageView mPhotoView;
 
     TextView bodyView;
-    private boolean mIsCard = false;
     private int mStatusBarFullOpacityBottom;
 
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.sss");
@@ -88,9 +77,6 @@ public class ArticleDetailFragment extends Fragment implements
             mItemId = getArguments().getLong(ARG_ITEM_ID);
         }
 
-//        mIsCard = getResources().getBoolean(R.bool.detail_is_card);
-//        mStatusBarFullOpacityBottom = getResources().getDimensionPixelSize(
-//                R.dimen.detail_card_top_margin);
         setHasOptionsMenu(true);
     }
 
@@ -113,66 +99,9 @@ public class ArticleDetailFragment extends Fragment implements
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mRootView = inflater.inflate(R.layout.fragment_article_detail, container, false);
-        coordinatorLayout = (CoordinatorLayout)mRootView.findViewById(R.id.draw_insets_frame_layout);
-//        mDrawInsetsFrameLayout = (DrawInsetsFrameLayout)
-//                mRootView.findViewById(R.id.draw_insets_frame_layout);
-//        mDrawInsetsFrameLayout.setOnInsetsCallback(new DrawInsetsFrameLayout.OnInsetsCallback() {
-//            @Override
-//            public void onInsetsChanged(Rect insets) {
-//                mTopInset = insets.top;
-//            }
-//        });
-        scrollView = (NestedScrollView) mRootView.findViewById(R.id.scrollview);
-                //setCallbacks(new ObservableScrollView.Callbacks() {
-//            @Override
-//            public void onScrollChanged() {
-//                mScrollY = mScrollView.getScrollY();
-//                getActivityCast().onUpButtonFloorChanged(mItemId, ArticleDetailFragment.this);
-//                mPhotoContainerView.setTranslationY((int) (mScrollY - mScrollY / PARALLAX_FACTOR));
-//                updateStatusBar();
-//            }
-//        });
-       // mPhotoView = (ImageView) getActivity().findViewById(R.id.photo);
-      //  mPhotoContainerView = mRootView.findViewById(R.id.photo_container);
-
-       // mStatusBarColorDrawable = new ColorDrawable(0);
-
-
-
-        //getLoaderManager().initLoader(0, null, this);
        bindViews();
-       // updateStatusBar();
         return mRootView;
     }
-
-//    private void updateStatusBar() {
-//        int color = 0;
-//        if (mPhotoView != null && mTopInset != 0 && mScrollY > 0) {
-//            float f = progress(mScrollY,
-//                    mStatusBarFullOpacityBottom - mTopInset * 3,
-//                    mStatusBarFullOpacityBottom - mTopInset);
-//            color = Color.argb((int) (255 * f),
-//                    (int) (Color.red(mMutedColor) * 0.9),
-//                    (int) (Color.green(mMutedColor) * 0.9),
-//                    (int) (Color.blue(mMutedColor) * 0.9));
-//        }
-//        //mStatusBarColorDrawable.setColor(color);
-//        //mDrawInsetsFrameLayout.setInsetBackground(mStatusBarColorDrawable);
-//    }
-
-//    static float progress(float v, float min, float max) {
-//        return constrain((v - min) / (max - min), 0, 1);
-//    }
-
-//    static float constrain(float val, float min, float max) {
-//        if (val < min) {
-//            return min;
-//        } else if (val > max) {
-//            return max;
-//        } else {
-//            return val;
-//        }
-//    }
 
     private Date parsePublishedDate() {
         try {
@@ -186,9 +115,9 @@ public class ArticleDetailFragment extends Fragment implements
     }
 
     private void bindViews() {
-//        if (mRootView == null) {
-//            return;
-//        }
+        if (mRootView == null) {
+            return;
+        }
      mPhotoView = mRootView.findViewById(R.id.photo);
         titleView = mRootView.findViewById(R.id.article_title);
         bylineView =  mRootView.findViewById(R.id.article_byline);
@@ -202,11 +131,8 @@ public class ArticleDetailFragment extends Fragment implements
             mRootView.animate().alpha(1);
             String title = mCursor.getString(ArticleLoader.Query.TITLE);
             titleView.setText(title);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            }
             String body = mCursor.getString(ArticleLoader.Query.BODY);
             bodyView.setText(Html.fromHtml(body));
-            //bodyView.setText(Html.fromHtml(mCursor.getString(ArticleLoader.Query.BODY).replaceAll("(\r\n|\n)", "<br />")));
 
             Date publishedDate = parsePublishedDate();
             if (!publishedDate.before(START_OF_EPOCH.getTime())) {
@@ -286,14 +212,4 @@ public class ArticleDetailFragment extends Fragment implements
          bindViews();
     }
 
-//    public int getUpButtonFloor() {
-//        if (mPhotoContainerView == null || mPhotoView.getHeight() == 0) {
-//            return Integer.MAX_VALUE;
-//        }
-//
-//        // account for parallax
-//        return mIsCard
-//                ? (int) mPhotoContainerView.getTranslationY() + mPhotoView.getHeight() - mScrollY
-//                : mPhotoView.getHeight() - mScrollY;
-//    }
 }
