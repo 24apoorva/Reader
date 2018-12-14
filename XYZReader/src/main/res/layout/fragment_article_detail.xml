@@ -1,7 +1,6 @@
 <android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/draw_insets_frame_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -42,8 +41,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:background="#fff"
-            android:elevation="2dp"
+            android:background="@color/white"
+            android:elevation="@dimen/elevation"
             android:maxWidth="@dimen/detail_card_max_width"
             android:orientation="vertical">
 
@@ -53,7 +52,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:layout_marginBottom="@dimen/detail_metabar_vert_padding"
-                android:background="#333"
+                android:background="@color/dark_gray"
                 android:orientation="vertical"
                 android:paddingBottom="@dimen/detail_metabar_vert_padding"
                 android:paddingLeft="@dimen/detail_inner_horiz_margin"
@@ -68,8 +67,7 @@
                     android:fontFamily="sans-serif-condensed"
                     android:lineSpacingMultiplier="0.9"
                     android:paddingBottom="@dimen/detail_metabar_title_bottom_padding"
-                    android:textColor="#fff"
-                    tools:text = "dbfdshbh"
+                    android:textColor="@color/white"
                     android:textStyle="bold" />
 
                 <TextView
@@ -77,8 +75,7 @@
                     style="@style/TextAppearance.AppCompat.Small"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="hdbfsbdhds"
-                    android:textColor="#8fff" />
+                    android:textColor="@color/light_white" />
             </LinearLayout>
 
             <TextView
@@ -91,10 +88,7 @@
                 android:lineSpacingMultiplier="@fraction/detail_body_line_spacing_multiplier"
                 android:paddingBottom="@dimen/detail_body_bottom_margin"
                 android:textColor="@color/cardview_dark_background"
-                android:textColorLink="@color/theme_accent"
-                tools:text = "dbjsbhf  bhsdvfgvdsgh" />
-
-
+                android:textColorLink="@color/theme_accent"/>
 
         </com.example.xyzreader.ui.MaxWidthLinearLayout>
     </android.support.v4.widget.NestedScrollView>
