@@ -10,7 +10,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
+
+import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.graphics.Palette;
 import android.text.Html;
 import android.text.format.DateUtils;
@@ -21,10 +24,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.example.xyzreader.R;
 import com.example.xyzreader.data.ArticleLoader;
+import com.github.florent37.picassopalette.PicassoPalette;
+import com.squareup.picasso.Picasso;
 
 /**
  * A fragment representing a single Article detail screen. This fragment is
@@ -42,7 +48,6 @@ public class ArticleDetailFragment extends Fragment implements
     private long mItemId;
     private View mRootView;
     TextView titleView;
-    private int mMutedColor = 0xFF333333;
     private ImageView mPhotoView;
 
     TextView bodyView;
@@ -109,7 +114,6 @@ public class ArticleDetailFragment extends Fragment implements
             return dateFormat.parse(date);
         } catch (ParseException ex) {
             Log.e(TAG, ex.getMessage());
-            Log.i(TAG, "passing today's date");
             return new Date();
         }
     }
@@ -122,28 +126,37 @@ public class ArticleDetailFragment extends Fragment implements
         titleView = mRootView.findViewById(R.id.article_title);
         bylineView =  mRootView.findViewById(R.id.article_byline);
         bodyView = mRootView.findViewById(R.id.article_body);
-
         bylineView.setMovementMethod(new LinkMovementMethod());
         bodyView.setTypeface(Typeface.createFromAsset(getResources().getAssets(), "Rosario-Regular.ttf"));
         if (mCursor != null) {
             mRootView.setAlpha(0);
             mRootView.setVisibility(View.VISIBLE);
             mRootView.animate().alpha(1);
-            String title = mCursor.getString(ArticleLoader.Query.TITLE);
-            titleView.setText(title);
+            titleView.setText(mCursor.getString(ArticleLoader.Query.TITLE));
             String body = mCursor.getString(ArticleLoader.Query.BODY);
             bodyView.setText(Html.fromHtml(body));
 
             Date publishedDate = parsePublishedDate();
             if (!publishedDate.before(START_OF_EPOCH.getTime())) {
-                bylineView.setText(Html.fromHtml(
-                        DateUtils.getRelativeTimeSpanString(
-                                publishedDate.getTime(),
-                                System.currentTimeMillis(), DateUtils.HOUR_IN_MILLIS,
-                                DateUtils.FORMAT_ABBREV_ALL).toString()
-                                + " by <font color='#ffffff'>"
-                                + mCursor.getString(ArticleLoader.Query.AUTHOR)
-                                + "</font>"));
+
+                StringBuilder byLineText = new StringBuilder(DateUtils.getRelativeTimeSpanString(
+                        publishedDate.getTime(),
+                        System.currentTimeMillis(), DateUtils.HOUR_IN_MILLIS,
+                        DateUtils.FORMAT_ABBREV_ALL).toString());
+                byLineText.append(" by <font color='#ffffff'>");
+                byLineText.append(mCursor.getString(ArticleLoader.Query.AUTHOR));
+                byLineText.append("</font>");
+
+                bylineView.setText(Html.fromHtml(byLineText.toString()));
+
+//                bylineView.setText(Html.fromHtml(
+//                        DateUtils.getRelativeTimeSpanString(
+//                                publishedDate.getTime(),
+//                                System.currentTimeMillis(), DateUtils.HOUR_IN_MILLIS,
+//                                DateUtils.FORMAT_ABBREV_ALL).toString()
+//                                + " by <font color='#ffffff'>"
+//                                + mCursor.getString(ArticleLoader.Query.AUTHOR)
+//                                + "</font>"));
 
             } else {
                 // If date is before 1902, just show the string
@@ -154,25 +167,11 @@ public class ArticleDetailFragment extends Fragment implements
 
             }
 
-            ImageLoaderHelper.getInstance(getActivity()).getImageLoader()
-                    .get(mCursor.getString(ArticleLoader.Query.PHOTO_URL), new ImageLoader.ImageListener() {
-                        @Override
-                        public void onResponse(ImageLoader.ImageContainer imageContainer, boolean b) {
-                            Bitmap bitmap = imageContainer.getBitmap();
-                            if (bitmap != null) {
-                                Palette p = Palette.generate(bitmap, 12);
-                                mMutedColor = p.getDarkMutedColor(0xFF333333);
-                                mPhotoView.setImageBitmap(imageContainer.getBitmap());
-                                mRootView.findViewById(R.id.meta_bar)
-                                        .setBackgroundColor(mMutedColor);
-                            }
-                        }
-                        @Override
-                        public void onErrorResponse(VolleyError volleyError) {
-                        }
-                    });
-
-
+            String url = mCursor.getString(ArticleLoader.Query.PHOTO_URL);
+            Picasso.with(this.getActivity().getApplicationContext()).load(url).into(mPhotoView,
+                    PicassoPalette.with(url, mPhotoView)
+                            .use(PicassoPalette.Profile.MUTED_DARK)
+                            .intoBackground(mRootView.findViewById(R.id.meta_bar)));
 
         } else {
             mRootView.setVisibility(View.GONE);
@@ -198,7 +197,6 @@ public class ArticleDetailFragment extends Fragment implements
 
         mCursor = cursor;
         if (mCursor != null && !mCursor.moveToFirst()) {
-            Log.e(TAG, "Error reading item detail cursor");
             mCursor.close();
             mCursor = null;
         }

@@ -7,4 +7,7 @@
     <string name="action_share">Share</string>
     <string name="up">Up</string>
     <string name="image_description">Image</string>
+    <string name="fab_type">text/plain</string>
+    <string name="fab_samp_text">Some sample text</string>
+
 </resources>

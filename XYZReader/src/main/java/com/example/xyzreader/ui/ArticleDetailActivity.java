@@ -14,6 +14,8 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.example.xyzreader.MyPagerAdapter;
 import com.example.xyzreader.R;
 import com.example.xyzreader.data.ArticleLoader;
 import com.example.xyzreader.data.ItemsContract;
@@ -48,7 +50,7 @@ public class ArticleDetailActivity extends AppCompatActivity
 
         mPager.setAdapter(mPagerAdapter);
 
-        mPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+        mPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
 //            @Override
 //            public void onPageScrollStateChanged(int state) {
 //                super.onPageScrollStateChanged(state);
@@ -98,8 +100,8 @@ public class ArticleDetailActivity extends AppCompatActivity
                         @Override
                         public void onClick(View view) {
                             startActivity(Intent.createChooser(ShareCompat.IntentBuilder.from(ArticleDetailActivity.this)
-                                    .setType("text/plain")
-                                    .setText("Some sample text")
+                                    .setType(getResources().getString(R.string.fab_type))
+                                    .setText(getResources().getString(R.string.fab_samp_text))
                                     .getIntent(), getString(R.string.action_share)));
                         }
                     });
@@ -118,28 +120,5 @@ public class ArticleDetailActivity extends AppCompatActivity
         mPagerAdapter.notifyDataSetChanged();
     }
 
-    private class MyPagerAdapter extends FragmentStatePagerAdapter {
-        public MyPagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-        Cursor cursor;
-        public void setCursor(Cursor zcursor) {
-            cursor = zcursor;
-        }
-        @Override
-        public void setPrimaryItem(ViewGroup container, int position, Object object) {
-            super.setPrimaryItem(container, position, object);
-        }
 
-        @Override
-        public Fragment getItem(int position) {
-            cursor.moveToPosition(position);
-            return ArticleDetailFragment.newInstance(mCursor.getLong(ArticleLoader.Query._ID));
-        }
-
-        @Override
-        public int getCount() {
-            return (mCursor != null) ? mCursor.getCount() : 0;
-        }
-    }
 }
